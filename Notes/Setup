@@ -1,0 +1,47 @@
+*** If there is some problem with the control system that you don't know how to fix, send me a message ***
+
+Control System Setup:
+1) Power the board, make sure ethernet module LED and board power LED (5V) are on
+2) Connect the ethernet module to a router LAN port
+3) Connect the laptop to a router LAN port
+4) Make sure that the orange and green lights are on for both the laptop ethernet port and the ethernet module port
+5) Open a command prompt and type 'ping 192.168.0.177', make sure there is a response
+    If there is no response from the ethernet module, open the network settings for the laptop
+    Double check that there is a wired connection and that it is enabled (under change adapter settings)
+6) Open 'i2c_ip.py' with IDLE and run it. This is a test program that should run a motor
+    The shell window that opens when you run the program will print a message if the laptop successfully connects to the board
+    If there is an error in the shell (red text), try to understand the source of the problem
+    Make sure that you followed all of the previous steps
+    If you get an error that you really don't understand, screenshot it and send it to me
+7) Open the control program you want to use and run it
+    If you lose communication with the ROV or if the ROV becomes unresponsive, stop the program by closing the shell window
+    Cycle the power and repeat step 5 before restarting the program
+    Make sure that there is a delay in your main program loop (board.sleep(sec))
+    This is to prevent the laptop from sending information faster than the board can respond
+
+General Troubleshooting:
+- Pay attention to the current reading on the power meter and the LEDs on the board.
+  If the current spikes or the LEDs go out, there could be a short, and you should turn the ROV off and examine the board.
+
+- If the board is not getting power, use a meter to check that there is 12V across the power screw terminals.
+  If board is getting 12V but the power LED is not on, make sure that diodes D1 and D8 have been replaced with a single Schottky diode (STPSC8065).
+    If the pads for D1 or D8 are shorted, you should replace the wire with one of these diodes.
+  If there is still a problem, check the voltage output of the 5V regulator and replace it if needed.
+
+- Calibrating motor direction should be done through wiring (flip any 2 wires to change direction).
+  You should be able to do this once and never have to change it.
+  However, if you need to change it last minute, flip the sign of the throttle value in the control program.
+
+- Pay attention to the shell window while the program is running.
+  The program should continually print throttle values to the shell.
+  If the ROV isn't responding, check the shell window.
+    - If throttle values are being printed intermittently, try replacing the ATMega chips
+    - If throttle values aren't being printed or if there is an error, connection has been lost and the program needs to be reset.
+    (If you continue to lose connection randomly, let me know)
+
+
+- If one of the motors is not running, you should:
+    - Make sure that you are using the board_i2c_write_request command correctly (double check with other programs)
+    - Make sure that all 3 of the motor wires are connected to the same ESC screw terminal on the board
+    - Check for 12V on the ESC screw terminal
+    - Swap the ESC ATMega8 chip with another that has the same ID and is known to be working
