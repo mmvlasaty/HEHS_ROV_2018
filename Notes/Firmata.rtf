@@ -1,0 +1,247 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+{\fonttbl\f0\fswiss\fcharset0 Helvetica-Bold;\f1\fmodern\fcharset0 Courier;\f2\fswiss\fcharset0 Helvetica;
+\f3\fnil\fcharset0 Menlo-Regular;}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;\red38\green38\blue38;\red255\green255\blue255;
+\red0\green116\blue0;\red255\green255\blue255;\red170\green13\blue145;\red0\green0\blue0;\red28\green0\blue207;
+\red196\green26\blue22;}
+{\*\expandedcolortbl;;\cssrgb\c0\c0\c0;\cssrgb\c20000\c20000\c20000;\cssrgb\c100000\c100000\c100000;
+\csgenericrgb\c0\c45600\c0;\csgray\c100000;\csgenericrgb\c66500\c5200\c56900;\csgenericrgb\c0\c0\c0;\csgenericrgb\c11000\c0\c81000;
+\csgenericrgb\c77000\c10200\c8600;}
+\margl1440\margr1440\vieww10800\viewh8400\viewkind0
+\deftab720
+\pard\pardeftab720\sl280\partightenfactor0
+
+\f0\b\fs36 \cf2 \expnd0\expndtw0\kerning0
+\ul \ulc2 Instructions for modifying Firmata
+\f1\b0\fs24 \ulnone \
+\
+Arduino Firmata Ethernet Setup\
+\
+W5200 Drivers \
+\
+https://github.com/Seeed-Studio/Ethernet_Shield_W5200\
+\
+Remove Ethernet Directory from Arduino IDE Library.\
+\
+Import W5200 Ethernet Drivers into Arduino IDE\
+\
+Install Sample PrimaryFirmataEthernet\
+\
+Save PrimaryFirmataEthernet sketch\
+\
+Open ethernetConfig.h, add W5200 Library, comment out Ethernet.h line, change the remote IP to 192.168.0.xx (server\'92s IP address) and change local_IP to 192.168.0.177.\
+\
+Navigate to Arduino/libraries/Firmata/Utility/EthernetServerStream.h and edit it with a text editor.  When it opens, edit #include <Ethernet.h> to #include <EthernetV2_0.h> and save the file.\
+\
+\
+W5200 on Arduino\
+\
+https://nathan.chantrell.net/20120811/using-the-atmega1284p-with-the-arduino-ide-wiz820io/ \
+\
+WIZ820IO needs a reset signal to be enabled by standalone atmega328p\
+\
+From:  https://forum.pjrc.com/threads/41958-Ethernet-begin-hangs-after-power-cyle-in-Nov-29-2016-release\
+\
+Add the following before Ethernet.begin() in void initTransport() of StandardFirmataEthernet\
+\
+  pinMode(PIN_TO_DIGITAL(7), OUTPUT);    // switch off SD card bypassing Firmata\
+  digitalWrite(PIN_TO_DIGITAL(7), LOW); // WIZ820io RESET is active low;\
+  delay(250);                           // need atleast 2us low\
+  digitalWrite(PIN_TO_DIGITAL(7), HIGH); // Release WIZ820io Reset\
+  delay(500);                           // need atleast 150ms low\
+\
+Save the sketch, build and run. \
+\
+\
+BlueESC Python Control:  https://www.youtube.com/watch?v=Ecfi71G2Hq4\
+\
+https://www.dropbox.com/sh/btfzhd3q2ox37uf/AAB-JFvWSD_Um9bVl_S_k9vya?dl=0\
+\
+USE I2C Scanner to find BlueESC addresses.\
+\
+\pard\pardeftab720\sl280\partightenfactor0
+
+\f0\b\fs36 \cf2 Explanation of using Pymata
+\f1\b0\fs24 \
+\
+\pard\pardeftab720\partightenfactor0
+
+\f2 \cf3 \cb4 http://www.instructables.com/id/Going-Beyond-StandardFirmata-Adding-New-Device-Sup/
+\f0\b\fs28 \
+\
+Example code for controlling BlueESC over Ethernet\
+\
+\pard\tx543\pardeftab543\pardirnatural\partightenfactor0
+
+\f3\b0\fs22 \cf5 \cb6 \kerning1\expnd0\expndtw0 #!/usr/bin/python
+\f2\fs24 \cf0 \
+
+\f3\fs22 \cf7 from\cf8  pymata_aio.pymata3 \cf7 import\cf8  PyMata3
+\f2\fs24 \cf0 \
+
+\f3\fs22 \cf7 from\cf8  pymata_aio.constants \cf7 import\cf8  Constants
+\f2\fs24 \cf0 \
+\
+
+\f3\fs22 \cf8 BOARD_LED = \cf9 8
+\f2\fs24 \cf0 \
+
+\f3\fs22 \cf8 board = PyMata3(ip_address = \cf9 '192.168.0.177'\cf8 , ip_port=\cf9 3030\cf8 , ip_handshake=\cf9 ''\cf8 ) # IP address of StandardFirmataEthernet and port
+\f2\fs24 \cf0 \
+\
+
+\f3\fs22 \cf5 # I2c address of the motor controllers "0x29" = 41 is the default
+\f2\fs24 \cf0 \
+
+\f3\fs22 \cf8 DEVICE0_ADDRESS = \cf9 41
+\f2\fs24 \cf0 \
+
+\f3\fs22 \cf8 DEVICE1_ADDRESS = \cf9 42
+\f2\fs24 \cf0 \
+
+\f3\fs22 \cf8 DEVICE2_ADDRESS = \cf9 43
+\f2\fs24 \cf0 \
+\
+
+\f3\fs22 \cf5 # I2c register of the throttle (it is 16 bit/2 byte so treat it like a "word")
+\f2\fs24 \cf0 \
+
+\f3\fs22 \cf8 THROTTLE0 = \cf9 6000 # max value = 32000
+\f2\fs24 \cf0 \
+
+\f3\fs22 \cf8 THROTTLE1 = \cf9 6000
+\f2\fs24 \cf0 \
+
+\f3\fs22 \cf8 THROTTLE2 = \cf9 6000
+\f2\fs24 \cf0 \
+\
+
+\f3\fs22 \cf7 def\cf8  setup():
+\f2\fs24 \cf0 \
+
+\f3\fs22 \cf5 #   board.set_pin_mode(BOARD_LED, Constants.OUTPUT)
+\f2\fs24 \cf0 \
+
+\f3\fs22 \cf5 # configure firmata for i2c on an UNO
+\f2\fs24 \cf0 \
+
+\f3\fs22 \cf8     board.i2c_config(\cf9 0\cf8 )
+\f2\fs24 \cf0 \
+\
+
+\f3\fs22 \cf7 def\cf8  loop():
+\f2\fs24 \cf0 \
+
+\f3\fs22 \cf5 #    print("LED On")
+\f2\fs24 \cf0 \
+
+\f3\fs22 \cf5 #    board.digital_write(BOARD_LED, 1)
+\f2\fs24 \cf0 \
+
+\f3\fs22 \cf5 #    board.sleep(1.0)
+\f2\fs24 \cf0 \
+
+\f3\fs22 \cf8     TEMP = \cf9 0x02
+\f2\fs24 \cf0 \
+
+\f3\fs22 \cf8     \cf5 #The temperature's I2c register (it's 2 bytes 0x06 and 0x07)
+\f2\fs24 \cf0 \
+
+\f3\fs22 \cf5 #    print("Is the BlueESC Alive?")
+\f2\fs24 \cf0 \
+
+\f3\fs22 \cf5 #    print(board.i2c_read_request(DEVICE_ADDRESS, TEMP, 9, Constants.I2C_READ))
+\f2\fs24 \cf0 \
+
+\f3\fs22 \cf5 #    print("Probably not in a real unit...")
+\f2\fs24 \cf0 \
+
+\f3\fs22 \cf5 #    board.sleep(1.0)
+\f2\fs24 \cf0 \
+
+\f3\fs22 \cf8     \cf7 print\cf8 (\cf10 "initialize the motor"\cf8 )
+\f2\fs24 \cf0 \
+
+\f3\fs22 \cf8     board.i2c_write_request(DEVICE0_ADDRESS, [\cf9 0\cf8 , \cf9 0\cf8 ,  \cf9 0\cf8 ]) #send 0, 0, 0 to arm the controller
+\f2\fs24 \cf0 \
+
+\f3\fs22 \cf8     board.i2c_write_request(DEVICE1_ADDRESS, [\cf9 0\cf8 , \cf9 0\cf8 ,  \cf9 0\cf8 ])
+\f2\fs24 \cf0 \
+
+\f3\fs22 \cf8     board.i2c_write_request(DEVICE2_ADDRESS, [\cf9 0\cf8 , \cf9 0\cf8 ,  \cf9 0\cf8 ])
+\f2\fs24 \cf0 \
+
+\f3\fs22 \cf8     board.sleep(\cf9 2.0\cf8 )
+\f2\fs24 \cf0 \
+
+\f3\fs22 \cf8     board.i2c_write_request(DEVICE0_ADDRESS, [\cf9 0\cf8 , -THROTTLE0>>\cf9 8\cf8 , -THROTTLE0]) #send (0, value>>8, value) to send (throttle command, high byte, low byte)
+\f2\fs24 \cf0 \
+
+\f3\fs22 \cf8     board.i2c_write_request(DEVICE1_ADDRESS, [\cf9 0\cf8 , -THROTTLE1>>\cf9 8\cf8 , -THROTTLE1])
+\f2\fs24 \cf0 \
+
+\f3\fs22 \cf8     board.i2c_write_request(DEVICE2_ADDRESS, [\cf9 0\cf8 , -THROTTLE2>>\cf9 8\cf8 , -THROTTLE2])
+\f2\fs24 \cf0 \
+
+\f3\fs22 \cf5 #    board.i2c_write_request(DEVICE_ADDRESS, [0x00 | 0x00 | 0x00])
+\f2\fs24 \cf0 \
+
+\f3\fs22 \cf8     board.sleep(\cf9 2.0\cf8 )
+\f2\fs24 \cf0 \
+\
+
+\f3\fs22 \cf8     \cf7 print\cf8 (\cf10 "turn on the motor forward"\cf8 )
+\f2\fs24 \cf0 \
+
+\f3\fs22 \cf8     board.i2c_write_request(DEVICE0_ADDRESS, [\cf9 0\cf8 , \cf9 0\cf8 ,  \cf9 0\cf8 ])
+\f2\fs24 \cf0 \
+
+\f3\fs22 \cf8     board.i2c_write_request(DEVICE1_ADDRESS, [\cf9 0\cf8 , \cf9 0\cf8 ,  \cf9 0\cf8 ])
+\f2\fs24 \cf0 \
+
+\f3\fs22 \cf8     board.i2c_write_request(DEVICE2_ADDRESS, [\cf9 0\cf8 , \cf9 0\cf8 ,  \cf9 0\cf8 ])
+\f2\fs24 \cf0 \
+
+\f3\fs22 \cf8     board.sleep(\cf9 2.0\cf8 )
+\f2\fs24 \cf0 \
+
+\f3\fs22 \cf8     board.i2c_write_request(DEVICE0_ADDRESS, [\cf9 0\cf8 , THROTTLE0>>\cf9 8\cf8 , THROTTLE0])
+\f2\fs24 \cf0 \
+
+\f3\fs22 \cf8     board.i2c_write_request(DEVICE1_ADDRESS, [\cf9 0\cf8 , THROTTLE1>>\cf9 8\cf8 , THROTTLE1])
+\f2\fs24 \cf0 \
+
+\f3\fs22 \cf8     board.i2c_write_request(DEVICE2_ADDRESS, [\cf9 0\cf8 , THROTTLE2>>\cf9 8\cf8 , THROTTLE2])
+\f2\fs24 \cf0 \
+
+\f3\fs22 \cf8     board.sleep(\cf9 2\cf8 )
+\f2\fs24 \cf0 \
+
+\f3\fs22 \cf5 \
+\cf7 if\cf8  __name__ == \cf10 "__main__"\cf8 :
+\f2\fs24 \cf0 \
+
+\f3\fs22 \cf8     setup()
+\f2\fs24 \cf0 \
+
+\f3\fs22 \cf8     \cf7 while\cf8  True:
+\f2\fs24 \cf0 \
+
+\f3\fs22 \cf8         loop()
+\f2\fs24 \cf0 \
+\
+\
+\pard\pardeftab720\partightenfactor0
+
+\f0\b\fs28 \cf3 \cb4 \expnd0\expndtw0\kerning0
+Add Ping to StandardFirmataEthernet\
+\
+https://github.com/MrYsLab/pymata-aio/wiki/Uploading-FirmataPlus-to-Arduino\
+\
+Copy all ping related code from Firmata plus found here:  https://github.com/MrYsLab/pymata-aio/tree/master/FirmataPlus\
+\
+\
+\
+Retrieve data from ping sensor:  https://github.com/MrYsLab/pymata-aio/blob/master/test/ping.py\
+\
+}
