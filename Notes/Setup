@@ -39,9 +39,9 @@ General Troubleshooting:
     - If throttle values aren't being printed or if there is an error, connection has been lost and the program needs to be reset.
     (If you continue to lose connection randomly, let me know)
 
-
 - If one of the motors is not running, you should:
     - Make sure that you are using the board_i2c_write_request command correctly (double check with other programs)
     - Make sure that all 3 of the motor wires are connected to the same ESC screw terminal on the board
     - Check for 12V on the ESC screw terminal
     - Swap the ESC ATMega8 chip with another that has the same ID and is known to be working
+

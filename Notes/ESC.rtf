@@ -1,0 +1,114 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+{\fonttbl\f0\fswiss\fcharset0 Helvetica-Bold;\f1\fswiss\fcharset0 Helvetica;\f2\froman\fcharset0 Times-Bold;
+\f3\froman\fcharset0 Times-Roman;\f4\froman\fcharset0 Times-Italic;\f5\fmodern\fcharset0 Courier;
+}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;\red0\green0\blue233;}
+{\*\expandedcolortbl;;\cssrgb\c0\c0\c0;\cssrgb\c0\c0\c93333;}
+\margl1440\margr1440\vieww19840\viewh12420\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\b\fs36 \cf0 \ul \ulc0 Instructions for making and flashing ESC firmware
+\f1\b0\fs24 \ulnone \
+\
+\pard\pardeftab720\sl440\sa298\partightenfactor0
+
+\f2\b\fs36 \cf2 \expnd0\expndtw0\kerning0
+Firmware Update and Customization\
+\pard\pardeftab720\sl280\sa240\partightenfactor0
+
+\f3\b0\fs24 \cf2 The Basic ESC uses the {\field{\*\fldinst{HYPERLINK "http://github.com/bluerobotics/tgy"}}{\fldrslt \cf3 \ul \ulc3 tgy firmware}} which is open source and editable. There are many parameters that can be changed to change the performance of the speed controller.\
+\pard\pardeftab720\sl340\sa280\partightenfactor0
+
+\f2\b\fs28 \cf2 Firmware Compilation\
+\pard\pardeftab720\sl280\sa240\partightenfactor0
+
+\f3\b0\fs24 \cf2 To compile the firmware, you\'92ll need the avra AVR Assembler.\
+\pard\pardeftab720\sl280\sa240\partightenfactor0
+
+\f4\i \cf2 Mac:
+\f3\i0  (Uses Homebrew)\
+\pard\pardeftab720\sl280\partightenfactor0
+
+\f5 \cf2 brew update\
+brew install avra\
+make blueesc.hex\
+\pard\pardeftab720\sl280\sa240\partightenfactor0
+
+\f3 \cf2 To compile the files with multiple I2C addresses, you can use the following:\
+\pard\pardeftab720\sl280\partightenfactor0
+
+\f5 \cf2 make build_blueesc_addresses\
+\pard\pardeftab720\sl280\sa240\partightenfactor0
+
+\f4\i \cf2 Linux (Ubuntu 14 LTS):
+\f3\i0 \
+\pard\pardeftab720\sl280\partightenfactor0
+
+\f5 \cf2 sudo apt-get install avra\
+git clone https://github.com/bluerobotics/tgy\
+cd tgy\
+make blueesc.hex\
+\
+\pard\pardeftab720\sl280\partightenfactor0
+
+\f4\i \cf2 (This part has already been done)
+\f5\i0 \
+\
+\
+\pard\pardeftab720\sl340\sa280\partightenfactor0
+
+\f2\b\fs36 \cf2 Firmware Flashing\
+\pard\pardeftab720\sl280\partightenfactor0
+
+\f3\b0\fs24 \cf2 Open the Arduino IDE and open preferences.  Next to \'93show verbose output during:\'94, check \'93upload\'94.\
+\
+Upload any sketch to an Arduino (over USB is fine).\
+\
+Scroll through the output and find the avrdude command. It should be in white text and look similar to this:\
+\
+\'93/Applications/Arduino.app/Contents/Java/hardware/tools/avr/bin/avrdude -C/Applications/Arduino.app/Contents/Java/hardware/tools/avr/etc/avrdude.conf -v -patmega328p -carduino -P/dev/cu.usbmodem14101 -b115200 -D -Uflash:w:/var/folders/q8/zc_5dcx92bv9r3htwd2_g9sw0000gn/T/arduino_build_579764/Blink.ino.hex:i\'94\
+\
+\'93\cf2 /Applications/Arduino.app/Contents/Java/hardware/tools/avr/bin/avrdude\'94 is the path for the avrdude executable.\
+\'93-C/Applications/Arduino.app/Contents/Java/hardware/tools/avr/etc/avrdude.conf\'94 defines the path for the avrdude config file.\
+\
+Whenever you want to use avrdude, paste these two paths into the terminal, then enter the other necessary flags.\
+By calling avrdude in this way, you can use it the way the Arduino IDE uses it, without having to install it yourself.\
+Refer to the avrdude documentation for using flags. (http://www.ladyada.net/learn/avr/avrdude.html)\
+\
+The other flags needed to flash the firmware are:\
+\
+-p <partno>\
+-c <programmer>\
+-P <port>\
+\
+When using the (programmer), these should be set to:\
+\
+-p atmega8\
+-c usbasp\
+-P USB\
+\
+The option to flash a hex file to the target is:\
+\
+\pard\pardeftab720\sl280\partightenfactor0
+\cf2 \outl0\strokewidth0 \strokec2 -U <memtype>:r|w|v:<filename>[:format]\cf2 \outl0\strokewidth0 \
+\pard\pardeftab720\sl280\partightenfactor0
+\cf2 \
+Example:\
+$ /Applications/Arduino.app/Contents/Java/hardware/tools/avr/bin/avrdude -C/Applications/Arduino.app/Contents/Java/hardware/tools/avr/etc/avrdude.conf -v -p atmega8 -c usbasp -P usb -U lfuse:w:0x3F:m -U hfuse:w:0xCA:m -U lock:w:0x3f:m -Uflash:w:/Users/matt/tgy-bluesc/blueesc_id0.hex:i \
+\
+Choose id0 for ESC 1, id1 for ESC2, etc.\
+\
+\
+\
+\
+\
+\
+\
+\
+\pard\pardeftab720\sl280\partightenfactor0
+\cf2 \
+\
+\
+\
+\
+}
